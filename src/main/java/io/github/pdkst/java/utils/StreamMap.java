@@ -1,4 +1,4 @@
-package io.github.pdkst.java.lang;
+package io.github.pdkst.java.utils;
 
 import lombok.experimental.Delegate;
 
