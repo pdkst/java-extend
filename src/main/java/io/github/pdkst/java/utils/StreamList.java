@@ -2,11 +2,9 @@ package io.github.pdkst.java.utils;
 
 import lombok.experimental.Delegate;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,6 +14,10 @@ import java.util.stream.Stream;
 public class StreamList<T> implements List<T> {
     private List<T> element;
     private Stream<T> stream;
+
+    public StreamList() {
+        element = new ArrayList<>();
+    }
 
     public StreamList(List<T> element) {
         Objects.requireNonNull(element);
@@ -93,6 +95,10 @@ public class StreamList<T> implements List<T> {
         return toStream().reduce(identity, accumulator, combiner);
     }
 
+    public Set<T> toSet() {
+        return toStream().collect(Collectors.toSet());
+    }
+
     public <K> StreamMap<K, T> toMap(Function<? super T, ? extends K> keyMapper) {
         return this.toMap(keyMapper, Function.identity());
     }
@@ -100,6 +106,48 @@ public class StreamList<T> implements List<T> {
     public <K, U> StreamMap<K, U> toMap(Function<? super T, ? extends K> keyMapper,
                                         Function<? super T, ? extends U> valueMapper) {
         return new StreamMap<K, U>(toStream().collect(Collectors.toMap(keyMapper, valueMapper)));
+    }
+
+    public <K, U> StreamMap<K, U> toConcurrentMap(Function<? super T, ? extends K> keyMapper,
+                                                  Function<? super T, ? extends U> valueMapper) {
+        return new StreamMap<K, U>(toStream().collect(Collectors.toConcurrentMap(keyMapper, valueMapper)));
+    }
+
+    public <KK> StreamMap<? extends KK, StreamList<T>> groupingBy(Function<? super T, ? extends KK> keyMapper) {
+        return toStream().collect(Collectors.groupingBy(keyMapper, StreamMap::new, Collectors.toCollection(StreamList::new)));
+    }
+
+    public <KK, R> StreamMap<? extends KK, R> groupingBy(Function<? super T, ? extends KK> keyMapper, Collector<T, ?, R> downstream) {
+        return toStream().collect(Collectors.groupingBy(keyMapper, StreamMap::new, downstream));
+    }
+
+    /**
+     * T extends CharSequence
+     *
+     * @return joining
+     */
+    public String joining() {
+        return toStream().map(t -> (CharSequence) t).collect(Collectors.joining());
+    }
+
+    /**
+     * T extends CharSequence
+     *
+     * @return joining
+     */
+    public String joining(CharSequence delimiter) {
+        return toStream().map(t -> (CharSequence) t).collect(Collectors.joining(delimiter));
+    }
+
+    /**
+     * T extends CharSequence
+     *
+     * @return joining
+     */
+    public String joining(CharSequence delimiter,
+                          CharSequence prefix,
+                          CharSequence suffix) {
+        return toStream().map(t -> (CharSequence) t).collect(Collectors.joining(delimiter, prefix, suffix));
     }
 
     Stream<T> toStream() {

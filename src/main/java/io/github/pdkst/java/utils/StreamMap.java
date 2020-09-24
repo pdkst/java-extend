@@ -1,9 +1,14 @@
 package io.github.pdkst.java.utils;
 
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Delegate;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -14,6 +19,10 @@ public class StreamMap<K, V> implements Map<K, V> {
     public Map<K, V> value;
     public Stream<Map.Entry<K, V>> stream;
 
+    public StreamMap() {
+        value = new HashMap<>();
+    }
+
     public StreamMap(Map<K, V> value) {
         Objects.requireNonNull(value);
         this.value = value;
@@ -22,6 +31,18 @@ public class StreamMap<K, V> implements Map<K, V> {
     public StreamMap(Stream<Entry<K, V>> stream) {
         Objects.requireNonNull(stream);
         this.stream = stream;
+    }
+
+    public StreamMap<K, V> toConcurrentMap() {
+        return new StreamMap<K, V>(new ConcurrentHashMap<>(eval()));
+    }
+
+    public <KK> StreamMap<KK, V> keyMap(Function<? super K, KK> keyMapper) {
+        return new StreamMap<>(toStream().map(kvEntry -> new EntryImpl<>(keyMapper.apply(kvEntry.getKey()), kvEntry.getValue())));
+    }
+
+    public <VV> StreamMap<K, VV> valueMap(Function<? super V, VV> valueMapper) {
+        return new StreamMap<>(toStream().map(kvEntry -> new EntryImpl<>(kvEntry.getKey(), valueMapper.apply(kvEntry.getValue()))));
     }
 
     Stream<Map.Entry<K, V>> toStream() {
@@ -41,4 +62,27 @@ public class StreamMap<K, V> implements Map<K, V> {
         return value;
     }
 
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    private static class EntryImpl<K, V> implements Entry<K, V> {
+        K k;
+        V v;
+
+        @Override
+        public K getKey() {
+            return k;
+        }
+
+        @Override
+        public V getValue() {
+            return v;
+        }
+
+        @Override
+        public V setValue(V value) {
+            V oldValue = v;
+            v = value;
+            return oldValue;
+        }
+    }
 }
