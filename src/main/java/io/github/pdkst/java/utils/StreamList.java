@@ -150,7 +150,11 @@ public class StreamList<T> implements List<T> {
         return toStream().map(t -> (CharSequence) t).collect(Collectors.joining(delimiter, prefix, suffix));
     }
 
-    Stream<T> toStream() {
+    public <R, A> R collect(Collector<? super T, A, R> collector) {
+        return toStream().collect(collector);
+    }
+
+    public Stream<T> toStream() {
         if (stream != null) {
             return stream;
         } else {
@@ -159,7 +163,7 @@ public class StreamList<T> implements List<T> {
     }
 
     @Delegate
-    List<T> eval() {
+    public List<T> eval() {
         if (element == null) {
             element = this.stream.collect(Collectors.toList());
             stream = null;
