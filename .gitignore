@@ -6,7 +6,6 @@
 **/*.iml
 */bin/*
 *.log
-*/test/*
 *.classpath
 *.project
 **/.DS_Store
