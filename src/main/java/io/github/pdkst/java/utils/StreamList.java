@@ -1,5 +1,6 @@
 package io.github.pdkst.java.utils;
 
+import lombok.EqualsAndHashCode;
 import lombok.experimental.Delegate;
 
 import java.util.*;
@@ -11,6 +12,7 @@ import java.util.stream.Stream;
 /**
  * @author pdkst
  */
+@EqualsAndHashCode
 public class StreamList<T> implements List<T> {
     private List<T> element;
     private Stream<T> stream;
@@ -85,7 +87,7 @@ public class StreamList<T> implements List<T> {
         return toStream().reduce(identity, accumulator);
     }
 
-    public Optional<T> reduce(BinaryOperator<T> accumulator) {
+    public java.util.Optional<T> reduce(BinaryOperator<T> accumulator) {
         return toStream().reduce(accumulator);
     }
 

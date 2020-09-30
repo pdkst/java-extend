@@ -1,5 +1,8 @@
 package io.github.pdkst.java.utils;
 
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
+
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -10,6 +13,8 @@ import java.util.function.Supplier;
  * @author pdkst
  * @see java.util.Optional
  */
+@ToString
+@EqualsAndHashCode
 public class Optional<T> {
     private final T o;
     private static final Optional<?> EMPTY = new Optional<>(null);
