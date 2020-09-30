@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
- * @author zl
+ * @author pdkst
  * @see java.util.Optional
  */
 public class Optional<T> {
@@ -97,5 +97,9 @@ public class Optional<T> {
 
     public boolean isEmpty() {
         return o == null;
+    }
+
+    public ContextOptional<T, T> withThisContext() {
+        return new ContextOptional<>(this, o);
     }
 }
