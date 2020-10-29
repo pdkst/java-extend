@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Delegate;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -54,6 +53,11 @@ public class StreamMap<K, V> implements Map<K, V> {
         return new StreamList<>(eval().values().stream());
     }
 
+    public StreamMap<K, V> andPut(K key, V value) {
+        this.put(key, value);
+        return this;
+    }
+
     Stream<Map.Entry<K, V>> toStream() {
         if (stream != null) {
             return stream;
@@ -69,6 +73,14 @@ public class StreamMap<K, V> implements Map<K, V> {
             stream = null;
         }
         return value;
+    }
+
+    public static <K, V> StreamMap<K, V> init(K key, V value) {
+        return StreamMap.<K, V>init().andPut(key, value);
+    }
+
+    public static <K, V> StreamMap<K, V> init() {
+        return new StreamMap<>();
     }
 
     @AllArgsConstructor

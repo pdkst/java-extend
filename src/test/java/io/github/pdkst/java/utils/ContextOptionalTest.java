@@ -25,9 +25,9 @@ class ContextOptionalTest {
     }
 
     @Test
-    void mapWithContext() {
+    void contextMap() {
         final ContextOptional<User, Address> userOpt = ContextOptional.ofNull(new User("123", null), new Address("detail"));
-        final ContextOptional<User, Address> next = userOpt.mapWithContext((user, address) -> {
+        final ContextOptional<User, Address> next = userOpt.contextMap((address, user) -> {
             user.setAddress(address);
             return user;
         });
@@ -36,11 +36,11 @@ class ContextOptionalTest {
     }
 
     @Test
-    void ifExistsWithContext() {
+    void contextIfExists() {
         final User user = new User("123", null);
         final Address address = new Address("detail at address");
         final ContextOptional<Address, User> userOpt = ContextOptional.ofNull(address, user);
-        userOpt.ifExistsWithContext(User::setAddress);
+        userOpt.contextIfExists(User::setAddress);
         log.info("user={}", user);
         assertNotNull(user.getAddress());
     }

@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 /**
+ * Optional, a value may null
  * @author pdkst
  * @see java.util.Optional
  */
@@ -75,6 +76,10 @@ public class Optional<T> {
         return exists() && predicate.test(o) ? this : ofNull();
     }
 
+    public T orElseNull() {
+        return isEmpty() ? null : o;
+    }
+
     public T orElse(T ifNull) {
         return isEmpty() ? ifNull : o;
     }
@@ -105,6 +110,6 @@ public class Optional<T> {
     }
 
     public ContextOptional<T, T> withThisContext() {
-        return new ContextOptional<>(this, o);
+        return ContextOptional.ofNull(this, o);
     }
 }

@@ -4,52 +4,94 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.util.Objects;
-import java.util.function.BiConsumer;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.util.function.*;
 
 /**
+ * A optional with a context
+ *
  * @author pdkst
  */
 @ToString
 @EqualsAndHashCode
 public class ContextOptional<T, C> {
-    private final Optional<T> opt;
+    private static final ContextOptional<Object, Object> NULL_CONTEXT = new ContextOptional<>((Object) null, null);
     private final C context;
+    private final T value;
 
-    public ContextOptional(Optional<T> opt, C context) {
-        this.opt = opt;
+    private ContextOptional(T value, C context) {
+        this.value = value;
         this.context = context;
     }
 
-    public ContextOptional(T t, C context) {
-        this(Optional.ofNull(t), context);
+    private ContextOptional(Optional<T> opt, C context) {
+        this.value = opt.orElseNull();
+        this.context = context;
     }
 
-    private  <R> ContextOptional<R, C> withContext(Optional<R> opt) {
-        return new ContextOptional<>(opt, context);
+    public ContextOptional<T, T> asContext() {
+        if (isEmpty()) {
+            return emptyContext();
+        }
+        return ofNull(value, value);
     }
 
     public <R> ContextOptional<R, C> map(Function<T, R> mapper) {
         Objects.requireNonNull(mapper);
-        final Optional<R> rOptional = Optional.ofNull(opt).map(mapper);
-        return withContext(rOptional);
-    }
-
-    public <R> ContextOptional<R, C> mapWithContext(BiFunction<T, C, R> mapper) {
-        Objects.requireNonNull(mapper);
-        final Optional<R> rOptional = Optional.ofNull(opt).map(t -> mapper.apply(t, context));
+        final Optional<R> rOptional = Optional.ofNull(value).map(mapper);
         return new ContextOptional<>(rOptional, context);
     }
 
-    public ContextOptional<T, C> ifExistsWithContext(BiConsumer<? super C, ? super T> mapper) {
+    public ContextOptional<T, C> filter(Predicate<T> filter) {
+        Objects.requireNonNull(filter);
+        if (exists() && filter.test(value)) {
+            return this;
+        }
+        return emptyContext();
+    }
+
+    public <R> ContextOptional<R, C> contextMap(BiFunction<? super C, ? super T, R> mapper) {
         Objects.requireNonNull(mapper);
-        Optional.ofNull(opt).ifExists(t -> mapper.accept(context, t));
+        if (isEmpty()) {
+            return emptyContext();
+        }
+        final R apply = mapper.apply(context, value);
+        if (apply == null) {
+            return emptyContext();
+        }
+        return ofNull(apply, context);
+    }
+
+    public ContextOptional<T, C> contextIfExists(BiConsumer<? super C, ? super T> mapper) {
+        Objects.requireNonNull(mapper);
+        if (exists()) {
+            mapper.accept(context, value);
+        }
         return this;
     }
 
+    public ContextOptional<T, C> contextFilter(BiPredicate<? super C, ? super T> filter) {
+        Objects.requireNonNull(filter);
+        if (exists() && filter.test(context, value)) {
+            return this;
+        }
+        return emptyContext();
+    }
+
     public T orElse(T ifNull) {
-        return Optional.ofNull(opt).orElse(ifNull);
+        return exists() ? value : ifNull;
+    }
+
+    public boolean isEmpty() {
+        return value == null;
+    }
+
+    public boolean exists() {
+        return value != null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T, C> ContextOptional<T, C> emptyContext() {
+        return (ContextOptional<T, C>) NULL_CONTEXT;
     }
 
     public static <T, C> ContextOptional<T, C> ofNull(T t) {
