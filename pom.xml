@@ -66,12 +66,7 @@
 		<repository>
 			<id>github</id>
 			<name>GitHub OWNER Apache Maven Packages</name>
-			<url>https://maven.pkg.github.com/pdkst/java/release</url>
+			<url>https://maven.pkg.github.com/pdkst/java-extend</url>
 		</repository>
-		<snapshotRepository>
-			<id>github-snapshot</id>
-			<name>GitHub OWNER Apache Maven Packages</name>
-			<url>https://maven.pkg.github.com/pdkst/java/snapshot</url>
-		</snapshotRepository>
 	</distributionManagement>
 </project>
